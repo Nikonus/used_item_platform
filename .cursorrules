@@ -1,0 +1,25 @@
+1. Color Palette (High-End & Trustworthy)
+Design mein Neutral Tones ka bahut sahi use hua hai. Used items ke liye ye isliye accha hai kyunki photos colourful hongi, toh background clean chahiye.
+
+Primary Background: #E2E5E6 (Wo light grey/off-white jo video mein hai. Ye white se better lagta hai.)
+
+Deep Dark (Text/Buttons): #0F1110 (Ekdum jet black nahi, thoda soft dark.)
+
+Accent Color (Interactions): #C5C7C5 (Hover states aur secondary buttons ke liye.)
+
+Card Background: #FFFFFF (Items ke cards ko lift dene ke liye pure white use kar.)
+
+2. Component List (For Your Platform)
+Video ke layout ko dekh kar ye components tere "Used Items" app/web ke liye perfect rahenge:
+
+Glassmorphic Navbar: Top par transparent ya blur background wala nav jisme "Rent", "Buy", "Sell" ke options ho.
+
+Hero Slider: Jaise video mein model change ho raha hai, wahan tu high-quality "Featured Ads" ya "Nearby Deals" dikha sakta hai.
+
+Category Grid: "Fresh Fits For Your Next Workout" wale section ki tarah tu "Electronics", "Furniture", "Vehicles" ke cards bana.
+
+Bento-style Product Cards: Ek bada card, do chhote cards ka mix (jaisa video ke middle mein hai). Ye "Trending Items" dikhane ke liye mast lagega.
+
+Floating Action Button (FAB): Ek bada round button "Sell Item" ke liye, jo screen par hamesha rahe.
+
+Micro-Interactions: Jab user item par hover kare, toh image halki si zoom ho ya price pop-up ho (jaise video mein transitions ho rahe hain).
