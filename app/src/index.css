@@ -115,7 +115,10 @@ button {
 .field input[type='password'],
 .field input[type='text'],
 .field input[type='tel'],
-.field input[type='file'] {
+.field input[type='file'],
+.field input[type='number'],
+.field textarea,
+.field select {
   border-radius: 12px;
   border: var(--border-subtle);
   padding: 9px 11px;
@@ -131,6 +134,15 @@ button {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px rgba(197, 199, 197, 0.7);
   background: #ffffff;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+.field select {
+  appearance: none;
 }
 
 .primary-btn,
@@ -310,12 +322,120 @@ button {
   gap: 18px;
 }
 
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
 .card {
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   padding: 18px 18px 16px;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
   border: var(--border-subtle);
+}
+
+.item-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 14px;
+  object-fit: cover;
+  background: #f0f2f2;
+  border: 1px solid rgba(15, 17, 16, 0.06);
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.item-title {
+  margin: 0;
+  font-size: 16px;
+}
+
+.muted {
+  color: #5a5f5e;
+  font-size: 13px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  background: rgba(15, 17, 16, 0.05);
+  border: 1px solid rgba(15, 17, 16, 0.06);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fab {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  background: var(--text-main);
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 999px;
+  box-shadow: 0 18px 40px rgba(15, 17, 16, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 20;
+  font-size: 14px;
+}
+
+.fab:hover {
+  transform: translateY(-1px);
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.gallery img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 1px solid rgba(15, 17, 16, 0.06);
+  background: #f0f2f2;
+}
+
+.actions-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .badge {
@@ -368,5 +488,10 @@ ul {
 
   .auth-card {
     padding-inline: 20px;
+  }
+
+  .fab {
+    right: 12px;
+    bottom: 12px;
   }
 }
