@@ -34,14 +34,43 @@ create table if not exists public.items (
   title text not null,
   description text,
   category text,
+  condition text check (condition in ('new', 'like_new', 'good', 'fair', 'poor')) default 'good',
   price numeric(10, 2) not null,
   currency text default 'INR',
   is_for_rent boolean default false,
   is_for_sale boolean default true,
+  is_active boolean default true,
   thumbnail_url text,
   created_at timestamp with time zone default now(),
   updated_at timestamp with time zone default now()
 );
+
+-- ITEM IMAGES (multiple images per item)
+create table if not exists public.item_images (
+  id uuid primary key default gen_random_uuid(),
+  item_id uuid not null references public.items(id) on delete cascade,
+  storage_path text not null,
+  public_url text not null,
+  position integer default 0,
+  created_at timestamp with time zone default now()
+);
+
+create index if not exists item_images_item_id_idx on public.item_images(item_id);
+
+-- Optional: enable updated_at behavior for items too
+create or replace function public.handle_item_updated()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists on_item_updated on public.items;
+create trigger on_item_updated
+before update on public.items
+for each row
+execute function public.handle_item_updated();
 
 
 -- ORDERS
@@ -71,6 +100,7 @@ create table if not exists public.transactions (
 
 
 -- STORAGE: create bucket `kyc_documents` in Supabase UI.
+-- STORAGE: create bucket `item_images` in Supabase UI (public bucket recommended for easy public URLs).
 -- Then add RLS policies similar to:
 -- - Only authenticated users can upload.
 -- - Users can only access objects where folder matches their auth.uid().
