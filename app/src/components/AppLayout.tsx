@@ -14,31 +14,13 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
             Used Items Hub
           </Link>
           <nav className="nav-links">
-            <NavLink to="/" end>
-              Home
-            </NavLink>
+            <NavLink to="/" end>Home</NavLink>
             <NavLink to="/items/new">Add item</NavLink>
             <NavLink to="/my-listings">My listings</NavLink>
             <NavLink to="/my-orders">
               My orders
               {itemCount > 0 && (
-                <span
-                  style={{
-                    marginLeft: 6,
-                    background: 'var(--text-main)',
-                    color: '#fff',
-                    borderRadius: '50%',
-                    width: 18,
-                    height: 18,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 10,
-                    fontWeight: 600,
-                  }}
-                >
-                  {itemCount}
-                </span>
+                <span className="cart-badge">{itemCount}</span>
               )}
             </NavLink>
             <NavLink to="/profile">Profile</NavLink>
@@ -54,10 +36,31 @@ export const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
       <main className="page-content">{children}</main>
 
+      {/* ✅ FOOTER START */}
+      <footer className="footer">
+        <div className="footer-inner">
+          <div className="footer-brand">
+            <strong>Used Items Hub</strong>
+            <p>Rent, Buy & Sell smarter within your community.</p>
+          </div>
+
+          <div className="footer-links">
+            <Link to="/">Home</Link>
+            <Link to="/items/new">Post Item</Link>
+            <Link to="/profile">My Profile</Link>
+            <Link to="/my-orders">Orders</Link>
+          </div>
+
+          <p className="footer-copy">
+            © {new Date().getFullYear()} Used Items Hub. All rights reserved.
+          </p>
+        </div>
+      </footer>
+      {/* ✅ FOOTER END */}
+
       <Link className="fab" to="/items/new" aria-label="Add item">
         + Sell/Rent
       </Link>
     </div>
   )
 }
-
