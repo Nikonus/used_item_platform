@@ -1,4 +1,5 @@
 import { Navigate, Outlet } from 'react-router-dom'
+import { LoadingSkeletonCard } from '../components/LoadingSkeleton'
 import { useAuth } from '../context/AuthContext'
 
 export const PrivateRoute = () => {
@@ -7,7 +8,7 @@ export const PrivateRoute = () => {
   if (loading) {
     return (
       <div className="fullscreen-center">
-        <div className="card">Loading...</div>
+        <LoadingSkeletonCard />
       </div>
     )
   }
