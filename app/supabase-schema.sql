@@ -79,11 +79,48 @@ create table if not exists public.orders (
   buyer_id uuid not null references auth.users(id) on delete cascade,
   seller_id uuid not null references auth.users(id) on delete cascade,
   item_id uuid not null references public.items(id) on delete cascade,
-  status text check (status in ('pending', 'paid', 'cancelled', 'completed')) default 'pending',
+  status text check (status in ('pending', 'paid', 'picked_up', 'delivered', 'cancelled', 'completed')) default 'pending',
   quantity integer default 1,
   total_amount numeric(10, 2) not null,
-  created_at timestamp with time zone default now()
+  -- Delivery fields
+  delivery_type text check (delivery_type in ('standard', 'express')) default 'standard',
+  delivery_fee numeric(10, 2) default 0,
+  distance_km numeric(8, 2),
+  buyer_address text,
+  buyer_address_lat numeric(10, 7),
+  buyer_address_lng numeric(10, 7),
+  seller_address text,
+  seller_address_lat numeric(10, 7),
+  seller_address_lng numeric(10, 7),
+  -- OTP fields
+  pickup_otp text,
+  delivery_otp text,
+  pickup_otp_verified boolean default false,
+  delivery_otp_verified boolean default false,
+  -- Timestamps
+  picked_up_at timestamp with time zone,
+  delivered_at timestamp with time zone,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
 );
+
+create or replace function public.handle_order_updated()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists on_order_updated on public.orders;
+create trigger on_order_updated
+before update on public.orders
+for each row
+execute function public.handle_order_updated();
+
+create index if not exists orders_buyer_id_idx on public.orders(buyer_id);
+create index if not exists orders_seller_id_idx on public.orders(seller_id);
+create index if not exists orders_item_id_idx on public.orders(item_id);
 
 
 -- TRANSACTIONS
