@@ -20,34 +20,64 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
+// 🚧 DEV ADMIN HELPER (REMOVE BEFORE PRODUCTION)
+const getDevUser = (): User | null => {
+  const raw = localStorage.getItem('dev_user')
+  if (!raw) return null
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const init = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      setSession(session ?? null)
-      setUser(session?.user ?? null)
+ useEffect(() => {
+  const init = async () => {
+    // ✅ Check for DEV ADMIN first
+    const devUser = getDevUser()
+    if (devUser) {
+      setUser(devUser)
+      setSession(null)
       setLoading(false)
+      return
     }
 
-    void init()
-
+    // Otherwise use real Supabase session
     const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session ?? null)
-      setUser(session?.user ?? null)
-    })
+      data: { session },
+    } = await supabase.auth.getSession()
 
-    return () => {
-      subscription.unsubscribe()
+    setSession(session ?? null)
+    setUser(session?.user ?? null)
+    setLoading(false)
+  }
+
+  void init()
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    const devUser = getDevUser()
+    if (devUser) {
+      setUser(devUser)
+      setSession(null)
+      return
     }
-  }, [])
+
+    setSession(session ?? null)
+    setUser(session?.user ?? null)
+  })
+
+  return () => {
+    subscription.unsubscribe()
+  }
+}, [])
+
 
   const signInWithEmail = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -70,6 +100,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const signOut = async () => {
+    localStorage.removeItem('dev_user') // remove dev bypass
     await supabase.auth.signOut()
   }
 
@@ -93,4 +124,3 @@ export const useAuth = () => {
   }
   return ctx
 }
-
