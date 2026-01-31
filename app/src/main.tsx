@@ -18,11 +18,13 @@ import { ProfilePage } from './pages/ProfilePage'
 import { PrivateRoute } from './routes/PrivateRoute'
 
 createRoot(document.getElementById('root')!).render(
+  
   <StrictMode>
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
           <Routes>
+           
             <Route path="/auth" element={<AuthPage />} />
             <Route element={<PrivateRoute />}>
               <Route path="/" element={<HomeFeedPage />} />
@@ -35,6 +37,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/my-orders" element={<MyOrdersPage />} />
               <Route path="/orders/:id" element={<OrderTrackingPage />} />
+              
             </Route>
           </Routes>
         </BrowserRouter>
