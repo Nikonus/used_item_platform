@@ -23,18 +23,35 @@ export const AddItemPage = () => {
     return title.trim().length >= 3 && price > 0 && images.length > 0 && !saving
   }, [title, price, images.length, saving])
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    if (!user) return
-    setSaving(true)
-    setError(null)
+const handleSubmit = async (e: FormEvent) => {
+  e.preventDefault()
 
+  if (!user) return
+
+  setSaving(true)
+  setError(null)
+
+  try {
     const is_for_rent = listingType === 'rent'
     const is_for_sale = listingType === 'sell'
 
+    // create temporary id first
+    const tempId = crypto.randomUUID()
+
+    // upload images first
+    const uploaded = await uploadItemImages({
+      ownerId: user.id,
+      itemId: tempId,
+      files: images,
+    })
+
+    const thumbnailUrl = uploaded[0]?.publicUrl ?? null
+
+    // insert item only after successful upload
     const { data: item, error: insertError } = await supabase
       .from('items')
       .insert({
+        id: tempId,
         owner_id: user.id,
         title: title.trim(),
         description: description.trim() || null,
@@ -45,50 +62,40 @@ export const AddItemPage = () => {
         is_for_rent,
         is_for_sale,
         is_active: true,
+        thumbnail_url: thumbnailUrl,
       })
       .select('id')
       .single()
 
     if (insertError || !item) {
-      setError(insertError?.message ?? 'Failed to create item.')
-      setSaving(false)
-      return
+      throw insertError ?? new Error('Failed to create item.')
     }
 
-    try {
-      const uploaded = await uploadItemImages({
-        ownerId: user.id,
-        itemId: item.id,
-        files: images,
-      })
+    const rows = uploaded.map((u, idx) => ({
+      item_id: item.id,
+      storage_path: u.storagePath,
+      public_url: u.publicUrl,
+      position: idx,
+    }))
 
-      const rows = uploaded.map((u, idx) => ({
-        item_id: item.id,
-        storage_path: u.storagePath,
-        public_url: u.publicUrl,
-        position: idx,
-      }))
+    const { error: imgError } = await supabase
+      .from('item_images')
+      .insert(rows)
 
-      const { error: imgError } = await supabase.from('item_images').insert(rows)
-      if (imgError) throw imgError
-
-      const thumbnailUrl = uploaded[0]?.publicUrl ?? null
-      if (thumbnailUrl) {
-        const { error: thumbError } = await supabase
-          .from('items')
-          .update({ thumbnail_url: thumbnailUrl })
-          .eq('id', item.id)
-        if (thumbError) throw thumbError
-      }
-
-      navigate(`/items/${item.id}`)
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Image upload failed.'
-      setError(msg)
-      setSaving(false)
-      return
+    if (imgError) {
+      throw imgError
     }
+
+    navigate(`/items/${item.id}`)
+  } catch (err) {
+    const msg =
+      err instanceof Error ? err.message : 'Failed to publish listing.'
+
+    setError(msg)
+  } finally {
+    setSaving(false)
   }
+}
 
   return (
     <AppLayout>
