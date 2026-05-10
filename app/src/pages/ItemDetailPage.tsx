@@ -180,30 +180,49 @@ export const ItemDetailPage = () => {
           <p className="muted">Seller profile not found.</p>
         )}
 
-        <div className="actions-row" style={{ marginTop: 14 }}>
-          <button
-            className="primary-btn"
-            onClick={() => {
-              if (item && seller) {
-                addItem({
-                  itemId: item.id,
-                  title: item.title,
-                  price: item.price,
-                  currency: item.currency ?? 'INR',
-                  thumbnailUrl: item.thumbnail_url,
-                  sellerId: item.owner_id,
-                })
-                navigate('/checkout')
-              }
-            }}
-            disabled={!item || !seller}
-          >
-            Add to Cart & Checkout
-          </button>
-          <Link to="/" className="secondary-btn">
-            Back to home
-          </Link>
-        </div>
+<div className="actions-row" style={{ marginTop: 14 }}>
+  <button
+    className="primary-btn"
+    onClick={async () => {
+      console.log("CLICKED");
+
+      if (!item) {
+        console.log("No item");
+        return;
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log("USER:", user);
+
+      if (!user) {
+        alert("Login required");
+        navigate("/auth");
+        return;
+      }
+
+      // ✅ ADD TO CART (no seller dependency)
+      addItem({
+        itemId: item.id,
+        title: item.title,
+        price: item.price,
+        currency: item.currency ?? "INR",
+        thumbnailUrl: item.thumbnail_url,
+        sellerId: item.owner_id, // just pass raw id
+      });
+
+      console.log("ITEM ADDED TO CART");
+
+      navigate("/checkout");
+    }}
+    disabled={!item}
+  >
+    Add to Cart & Checkout
+  </button>
+
+  <Link to="/" className="secondary-btn">
+    Back to home
+  </Link>
+</div>
       </section>
     </AppLayout>
   )
