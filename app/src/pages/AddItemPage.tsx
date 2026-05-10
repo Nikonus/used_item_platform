@@ -155,18 +155,19 @@ export const AddItemPage = () => {
             </select>
           </label>
 
-          <label className="field">
-            <span>Price (INR)</span>
-            <input
-              type="number"
-              min={1}
-              step="1"
-              required
-              value={Number.isFinite(price) ? price : 0}
-              onChange={(e) => setPrice(Number(e.target.value))}
-              placeholder="e.g. 499"
-            />
-          </label>
+<label className="field">
+  <span>Price (INR)</span>
+
+  <input
+    type="number"
+    min="1"
+    step="1"
+    required
+    value={price || ""}
+    onChange={(e) => setPrice(Number(e.target.value))}
+    placeholder="e.g. 499"
+  />
+</label>
         </div>
 
         <label className="field">
