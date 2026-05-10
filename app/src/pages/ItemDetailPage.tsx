@@ -19,6 +19,10 @@ type Item = {
   is_active: boolean | null
   thumbnail_url: string | null
   created_at: string
+
+  seller_address: string | null
+  seller_address_lat: number | null
+  seller_address_lng: number | null
 }
 
 type ItemImage = {
@@ -52,9 +56,26 @@ export const ItemDetailPage = () => {
 
       const { data: itemData, error: itemError } = await supabase
         .from('items')
-        .select(
-          'id,owner_id,title,description,category,condition,price,currency,is_for_rent,is_for_sale,is_active,thumbnail_url,created_at',
-        )
+.select(
+`
+id,
+owner_id,
+title,
+description,
+category,
+condition,
+price,
+currency,
+is_for_rent,
+is_for_sale,
+is_active,
+thumbnail_url,
+created_at,
+seller_address,
+seller_address_lat,
+seller_address_lng
+`,
+)
         .eq('id', id)
         .single()
 
@@ -201,15 +222,18 @@ export const ItemDetailPage = () => {
       }
 
       // ✅ ADD TO CART (no seller dependency)
-      addItem({
-        itemId: item.id,
-        title: item.title,
-        price: item.price,
-        currency: item.currency ?? "INR",
-        thumbnailUrl: item.thumbnail_url,
-        sellerId: item.owner_id, // just pass raw id
-      });
+addItem({
+  itemId: item.id,
+  title: item.title,
+  price: item.price,
+  currency: item.currency ?? 'INR',
+  thumbnailUrl: item.thumbnail_url,
+  sellerId: item.owner_id,
 
+  sellerAddress: item.seller_address ?? '',
+  sellerAddressLat: item.seller_address_lat ?? 0,
+  sellerAddressLng: item.seller_address_lng ?? 0,
+});
       console.log("ITEM ADDED TO CART");
 
       navigate("/checkout");

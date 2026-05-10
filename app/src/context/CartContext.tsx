@@ -7,6 +7,9 @@ type CartItem = {
   currency: string
   thumbnailUrl: string | null
   sellerId: string
+    sellerAddress: string
+  sellerAddressLat: number
+  sellerAddressLng: number
 }
 
 type CartContextValue = {

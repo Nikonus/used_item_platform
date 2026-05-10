@@ -17,6 +17,9 @@ type MyItem = {
   is_active: boolean | null
   thumbnail_url: string | null
   created_at: string
+seller_address: string | null
+seller_address_lat: number | null
+seller_address_lng: number | null
 }
 
 export const MyListingsPage = () => {
@@ -32,7 +35,21 @@ export const MyListingsPage = () => {
     setError(null)
     const { data, error } = await supabase
       .from('items')
-      .select('id,title,price,currency,category,is_for_rent,is_for_sale,is_active,thumbnail_url,created_at')
+      .select(`
+  id,
+  title,
+  price,
+  currency,
+  category,
+  is_for_rent,
+  is_for_sale,
+  is_active,
+  thumbnail_url,
+  created_at,
+  seller_address,
+  seller_address_lat,
+  seller_address_lng
+`)
       .eq('owner_id', user.id)
       .order('created_at', { ascending: false })
     if (error) setError(error.message)
