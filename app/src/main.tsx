@@ -16,6 +16,7 @@ import { MyOrdersPage } from './pages/MyOrdersPage'
 import { OrderTrackingPage } from './pages/OrderTrackingPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { PrivateRoute } from './routes/PrivateRoute'
+import { ProfileGuard } from './routes/ProfileGuard'
 
 createRoot(document.getElementById('root')!).render(
   
@@ -26,7 +27,8 @@ createRoot(document.getElementById('root')!).render(
           <Routes>
            
             <Route path="/auth" element={<AuthPage />} />
-            <Route element={<PrivateRoute />}>
+           <Route element={<PrivateRoute />}>
+  <Route element={<ProfileGuard />}>
               <Route path="/" element={<HomeFeedPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/profile" element={<ProfilePage />} />
@@ -38,6 +40,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/my-orders" element={<MyOrdersPage />} />
               <Route path="/orders/:id" element={<OrderTrackingPage />} />
               
+            </Route>
             </Route>
           </Routes>
         </BrowserRouter>

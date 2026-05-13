@@ -12,15 +12,13 @@ type KycDocType =
 type Profile = {
   full_name: string | null
   phone: string | null
-  // Address fields
   building_number: string | null
   street: string | null
   landmark: string | null
   city: string | null
   state: string | null
   pincode: string | null
-  // KYC
-  kyc_status: 'pending' | 'verified' | 'rejected' | null
+  kyc_status: 'pending' | 'submitted' | 'verified' | 'rejected' | null
   kyc_document_url: string | null
   kyc_doc_type: KycDocType | null
 }
@@ -33,19 +31,225 @@ const KYC_DOC_OPTIONS: { value: KycDocType; label: string }[] = [
   { value: 'driving_license', label: 'Driving Licence' },
 ]
 
+const kycStatusColor: Record<string, string> = {
+  pending:   'badge-pending',
+  submitted: 'badge-pending',
+  verified:  'badge-verified',
+  rejected:  'badge-rejected',
+}
+
+// ── Shared sub-components ────────────────────────────────────────────────────
+
+const InfoRow = ({ label, value }: { label: string; value: string }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 3, padding: '14px 4px' }}>
+    <p
+      style={{
+        margin: 0,
+        fontSize: 11,
+        color: '#9ca3af',
+        textTransform: 'uppercase',
+        letterSpacing: '0.08em',
+        fontWeight: 600,
+      }}
+    >
+      {label}
+    </p>
+    <p
+      style={{
+        margin: 0,
+        fontSize: 15,
+        lineHeight: 1.5,
+        color: '#111827',
+        fontWeight: 500,
+        wordBreak: 'break-word',
+      }}
+    >
+      {value}
+    </p>
+  </div>
+)
+
+const Divider = () => (
+  <div
+    style={{
+      height: 1,
+      background: 'rgba(15,17,16,0.08)',
+    }}
+  />
+)
+
+// ── Profile card (glass view) ────────────────────────────────────────────────
+
+const ProfileCard = ({
+  profile,
+  onEdit,
+}: {
+  profile: Profile
+  onEdit: () => void
+}) => {
+  const initials = (profile.full_name ?? '?')
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+
+  const addressParts = [
+    profile.building_number,
+    profile.street,
+    profile.landmark && `Near ${profile.landmark}`,
+    profile.city,
+    profile.state,
+    profile.pincode,
+  ].filter(Boolean) as string[]
+
+  const kycStatus = profile.kyc_status ?? 'pending'
+  const kycDocLabel =
+    KYC_DOC_OPTIONS.find((o) => o.value === profile.kyc_doc_type)?.label ?? null
+
+  return (
+    <div
+      style={{
+        background: '#ffffff',
+        borderRadius: 20,
+        border: '1px solid rgba(0,0,0,0.07)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.09), 0 1px 3px rgba(0,0,0,0.05)',
+        padding: '28px 26px 24px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
+      }}
+    >
+      {/* Page title inside card */}
+      <div>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>My Profile</h2>
+        <p style={{ margin: '4px 0 0', fontSize: 13, color: '#9ca3af' }}>Your saved details and KYC status.</p>
+      </div>
+
+      <Divider />
+
+      {/* Header — avatar + name + phone + KYC badge */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            background: 'var(--text-main)',
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 20,
+            fontWeight: 600,
+            flexShrink: 0,
+            boxShadow: '0 8px 20px rgba(15,17,16,0.28)',
+            letterSpacing: '0.04em',
+          }}
+        >
+          {initials}
+        </div>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 18,
+              fontWeight: 700,
+              letterSpacing: '0.01em',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {profile.full_name}
+          </h2>
+          <p style={{ margin: '3px 0 0', fontSize: 13, color: '#555958' }}>
+            {profile.phone}
+          </p>
+        </div>
+
+        <span className={`badge ${kycStatusColor[kycStatus] ?? 'badge-pending'}`}>
+          {kycStatus}
+        </span>
+      </div>
+
+      <Divider />
+
+      {/* Info rows — flat, divider-separated */}
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {addressParts.length > 0 && (
+          <>
+            <InfoRow label="Address" value={addressParts.join(', ')} />
+            {(kycDocLabel || profile.kyc_document_url) && <Divider />}
+          </>
+        )}
+
+        {kycDocLabel && (
+          <>
+            <InfoRow label="Document Type" value={kycDocLabel} />
+            {profile.kyc_document_url && <Divider />}
+          </>
+        )}
+
+        {profile.kyc_document_url && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, padding: '14px 4px' }}>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 11,
+                color: '#9ca3af',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                fontWeight: 600,
+              }}
+            >
+              Uploaded Document
+            </p>
+            <a
+              href={profile.kyc_document_url}
+              target="_blank"
+              rel="noreferrer"
+              style={{ fontSize: 15, color: '#2563eb', fontWeight: 500 }}
+            >
+              View KYC document
+            </a>
+          </div>
+        )}
+      </div>
+
+      <Divider />
+
+      <button
+        className="primary-btn"
+        type="button"
+        onClick={onEdit}
+        style={{ alignSelf: 'flex-start' }}
+      >
+        Edit profile
+      </button>
+    </div>
+  )
+}
+
+// ── Main page ────────────────────────────────────────────────────────────────
+
 export const ProfilePage = () => {
   const { user } = useAuth()
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [file, setFile] = useState<File | null>(null)
+
+  const [profile, setProfile]     = useState<Profile | null>(null)
+  const [loading, setLoading]     = useState(true)
+  const [saving, setSaving]       = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [error, setError]         = useState<string | null>(null)
+  const [file, setFile]           = useState<File | null>(null)
+  const [editing, setEditing]     = useState(false)
 
   useEffect(() => {
     const loadProfile = async () => {
       if (!user) return
       setLoading(true)
+
       const { data, error } = await supabase
         .from('profiles')
         .select(
@@ -73,15 +277,21 @@ export const ProfilePage = () => {
           },
         )
       }
+
       setLoading(false)
     }
 
     void loadProfile()
   }, [user])
 
+  const setField = <K extends keyof Profile>(key: K, value: Profile[K]) => {
+    setProfile((prev) => (prev ? { ...prev, [key]: value } : prev))
+  }
+
   const handleSaveProfile = async (e: FormEvent) => {
     e.preventDefault()
     if (!user || !profile) return
+
     setSaving(true)
     setError(null)
 
@@ -103,27 +313,22 @@ export const ProfilePage = () => {
       { onConflict: 'id' },
     )
 
-    if (error) setError(error.message)
+    if (error) {
+      setError(error.message)
+    } else {
+      setEditing(false)
+    }
+
     setSaving(false)
   }
 
-  // Generic field updater
-  const setField = <K extends keyof Profile>(key: K, value: Profile[K]) =>
-    setProfile((p) => (p ? { ...p, [key]: value } : p))
-
   const handleUploadKyc = async () => {
-    if (!user || !file) return
-
-    if (!profile?.kyc_doc_type) {
-      setError('Please select a document type before uploading.')
-      return
-    }
+    if (!user || !file || !profile?.kyc_doc_type) return
 
     setUploading(true)
     setError(null)
 
     const filePath = `${user.id}/${Date.now()}-${file.name}`
-
     const { error: uploadError } = await supabase.storage
       .from('kyc_documents')
       .upload(filePath, file)
@@ -144,7 +349,7 @@ export const ProfilePage = () => {
       .from('profiles')
       .update({
         kyc_document_url: publicUrl,
-        kyc_status: 'pending',
+        kyc_status: 'submitted',
         kyc_doc_type: profile.kyc_doc_type,
       })
       .eq('id', user.id)
@@ -153,14 +358,7 @@ export const ProfilePage = () => {
       setError(updateError.message)
     } else {
       setProfile((prev) =>
-        prev
-          ? {
-              ...prev,
-              kyc_document_url: publicUrl,
-              kyc_status: 'pending',
-              kyc_doc_type: profile.kyc_doc_type,
-            }
-          : prev,
+        prev ? { ...prev, kyc_document_url: publicUrl, kyc_status: 'submitted' } : prev,
       )
     }
 
@@ -177,18 +375,38 @@ export const ProfilePage = () => {
 
   if (!profile) return null
 
+  const profileCompleted =
+    profile.full_name &&
+    profile.phone &&
+    profile.building_number &&
+    profile.street &&
+    profile.city &&
+    profile.state &&
+    profile.pincode
+
+  // ── Glass card view ──────────────────────────────────────────────────────
+  if (profileCompleted && !editing) {
+    return (
+      <div className="page">
+        <main className="page-content narrow profile-layout" style={{ paddingTop: 24, paddingLeft: 16, paddingRight: 16 }}>
+          <ProfileCard profile={profile} onEdit={() => setEditing(true)} />
+        </main>
+      </div>
+    )
+  }
+
+  // ── Form view ────────────────────────────────────────────────────────────
   return (
     <div className="page">
-      <main className="page-content">
+      <main className="page-content narrow profile-layout">
         <h1>Profile & KYC</h1>
         <p className="subtitle">
-          Yahan se apni personal details manage karo aur identity document upload karo.
+          Manage your personal details and upload your identity document.
         </p>
 
         {error && <p className="error">{error}</p>}
 
-        {/* ── Personal Details ── */}
-        <form onSubmit={handleSaveProfile} className="card form">
+        <form onSubmit={handleSaveProfile} className="card profile-glass form">
           <h2>Profile details</h2>
 
           <label className="field">
@@ -197,7 +415,6 @@ export const ProfilePage = () => {
               type="text"
               value={profile.full_name ?? ''}
               onChange={(e) => setField('full_name', e.target.value)}
-              placeholder="Your full name"
             />
           </label>
 
@@ -207,11 +424,9 @@ export const ProfilePage = () => {
               type="tel"
               value={profile.phone ?? ''}
               onChange={(e) => setField('phone', e.target.value)}
-              placeholder="+91-XXXXXXXXXX"
             />
           </label>
 
-          {/* ── Address ── */}
           <h3 className="mt-md">Address</h3>
 
           <label className="field">
@@ -220,7 +435,6 @@ export const ProfilePage = () => {
               type="text"
               value={profile.building_number ?? ''}
               onChange={(e) => setField('building_number', e.target.value)}
-              placeholder="e.g. A-204, Shree Residency"
             />
           </label>
 
@@ -230,7 +444,6 @@ export const ProfilePage = () => {
               type="text"
               value={profile.street ?? ''}
               onChange={(e) => setField('street', e.target.value)}
-              placeholder="e.g. MG Road, Vijay Nagar"
             />
           </label>
 
@@ -240,7 +453,6 @@ export const ProfilePage = () => {
               type="text"
               value={profile.landmark ?? ''}
               onChange={(e) => setField('landmark', e.target.value)}
-              placeholder="e.g. Near Hanuman Temple"
             />
           </label>
 
@@ -251,7 +463,6 @@ export const ProfilePage = () => {
                 type="text"
                 value={profile.city ?? ''}
                 onChange={(e) => setField('city', e.target.value)}
-                placeholder="e.g. Jabalpur"
               />
             </label>
 
@@ -261,7 +472,6 @@ export const ProfilePage = () => {
                 type="text"
                 value={profile.state ?? ''}
                 onChange={(e) => setField('state', e.target.value)}
-                placeholder="e.g. Madhya Pradesh"
               />
             </label>
 
@@ -275,7 +485,6 @@ export const ProfilePage = () => {
                 onChange={(e) =>
                   setField('pincode', e.target.value.replace(/\D/g, ''))
                 }
-                placeholder="e.g. 482001"
               />
             </label>
           </div>
@@ -285,9 +494,12 @@ export const ProfilePage = () => {
           </button>
         </form>
 
-        {/* ── KYC ── */}
-        <section className="card">
+        <section
+          className="card profile-glass"
+          style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+        >
           <h2>KYC verification</h2>
+
           <p>
             Status:{' '}
             <span className={`badge badge-${profile.kyc_status ?? 'pending'}`}>
@@ -300,12 +512,13 @@ export const ProfilePage = () => {
             <select
               value={profile.kyc_doc_type ?? ''}
               onChange={(e) =>
-                setField('kyc_doc_type', e.target.value ? (e.target.value as KycDocType) : null)
+                setField(
+                  'kyc_doc_type',
+                  e.target.value ? (e.target.value as KycDocType) : null,
+                )
               }
             >
-              <option value="" disabled>
-                — Select document type —
-              </option>
+              <option value="">Select document type</option>
               {KYC_DOC_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
@@ -314,41 +527,23 @@ export const ProfilePage = () => {
             </select>
           </label>
 
-          <label className="field" htmlFor="kyc-file-input">
+          <label className="field">
             <span>Identity document</span>
             <input
-              id="kyc-file-input"
               type="file"
               accept="image/*,application/pdf"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
           </label>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
-            <button
-              type="button"
-              className="secondary-btn"
-              disabled={!file || uploading || !profile.kyc_doc_type}
-              onClick={handleUploadKyc}
-              style={{ alignSelf: 'flex-start' }}
-            >
-              {uploading ? 'Uploading...' : 'Upload KYC document'}
-            </button>
-
-            {profile.kyc_document_url && (
-              <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>
-                ✅ Current document:{' '}
-                <a
-                  href={profile.kyc_document_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ color: 'inherit', textDecoration: 'underline' }}
-                >
-                  View uploaded file ↗
-                </a>
-              </p>
-            )}
-          </div>
+          <button
+            type="button"
+            className="secondary-btn"
+            disabled={!file || uploading || !profile.kyc_doc_type}
+            onClick={handleUploadKyc}
+          >
+            {uploading ? 'Uploading...' : 'Upload KYC document'}
+          </button>
         </section>
       </main>
     </div>
