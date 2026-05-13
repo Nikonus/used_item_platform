@@ -337,6 +337,20 @@ button {
     0 24px 60px rgba(15,17,16,0.12);
 
   border-radius: 28px;
+  padding: 28px 28px 24px;
+}
+
+.hero-card h2 {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.hero-card .subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #5a5f5e;
 }
 .grid-2 {
   display: grid;
